@@ -226,3 +226,28 @@ curl -X PATCH \
     }
   }'
 ```
+
+#### 4. Validation: Verify Agent Gateway Binding
+
+To verify that the deployed Reasoning Engine is correctly configured to route traffic through the Agent Gateway, query the Reasoning Engine details using the GET API:
+
+```bash
+export REGION="us-east4"
+export PROJECT_ID="579295505315"
+export ENGINE_ID="6906419562154033152"
+
+curl -s -X GET \
+  -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+  "https://${REGION}-aiplatform.googleapis.com/v1beta1/projects/${PROJECT_ID}/locations/${REGION}/reasoningEngines/${ENGINE_ID}" \
+  | jq '.spec.deploymentSpec.agentGatewayConfig'
+```
+
+**Expected Output:**
+```json
+{
+  "agentToAnywhereConfig": {
+    "agentGateway": "projects/579295505315/locations/us-east4/agentGateways/agent-gateway-egress"
+  }
+}
+```
+
