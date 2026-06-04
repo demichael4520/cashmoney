@@ -159,10 +159,51 @@ curl -X PATCH \
 
 ### Method 2: Route via regional Agent Gateway (Egress Control)
 
-When using custom Agent Identity and Agent Gateways to govern traffic to the Cloud Run endpoint:
+When using custom Agent Identity and Agent Gateways to govern traffic to private endpoints or services peered via Private Service Connect (PSC), configure the Agent Gateway with private egress and DNS peering.
 
-1.  Make sure your Agent Gateway is deployed in the target region.
-2.  Bind your reasoning engine to the gateway by patching its `agentGatewayConfig`:
+#### 1. Define Agent Gateway Configuration with DNS Peering
+
+Create a file named `agw-egress-dns.yaml` containing the `dnsPeeringConfig` to resolve domain names in the target VPC network:
+
+```yaml
+name: agent-gateway-egress
+protocols:
+  - MCP
+googleManaged:
+  governedAccessPath: AGENT_TO_ANYWHERE
+registries:
+  - "//agentregistry.googleapis.com/projects/<PROJECT_ID>/locations/<REGION>"
+networkConfig:
+  egress:
+    networkAttachment: projects/<PROJECT_ID>/regions/<REGION>/networkAttachments/<PSC_ATTACHMENT_NAME>
+  dnsPeeringConfig:
+    domains:
+      - "internal.domain.corp."  # Suffix must end with a dot
+    targetProject: <TARGET_PROJECT_ID>
+    targetNetwork: projects/<TARGET_PROJECT_NUMBER>/global/networks/<VPC_NAME>
+```
+
+Import or update the Agent Gateway resource:
+```bash
+gcloud alpha network-services agent-gateways import agent-gateway-egress \
+  --source="agw-egress-dns.yaml" \
+  --location=<REGION> \
+  --project=<PROJECT_ID>
+```
+
+#### 2. Grant DNS Peering IAM Role
+
+For DNS peering to resolve successfully, the Agent Gateway service account must have the `roles/dns.peer` role on the target project hosting the DNS zone:
+
+```bash
+gcloud alpha projects add-iam-policy-binding <TARGET_PROJECT_ID> \
+  --member=serviceAccount:service-<GATEWAY_PROJECT_NUMBER>@gcp-sa-dep.iam.gserviceaccount.com \
+  --role=roles/dns.peer
+```
+
+#### 3. Bind your reasoning engine to the gateway
+
+Execute the following `PATCH` request to bind the reasoning engine:
 
 ```bash
 export REGION="us-east4"
