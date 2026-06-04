@@ -15,6 +15,27 @@ It can run completely **locally** using lightweight Python tools, or connect **r
 
 ---
 
+## 🌐 Public API Endpoints
+
+The tools (either local or via the MCP server) interact with the following public endpoints. If deploying the agent behind an **Agent Gateway** or firewall, outbound traffic (egress rules) must be permitted to these hosts:
+
+*   **Current Fiat Rates**: `https://open.er-api.com` (ExchangeRate-API)
+*   **Current Crypto Prices**: `https://api.coinbase.com` (Coinbase Public API)
+*   **Historical Rates**: `https://api.frankfurter.app` (Frankfurter ECB API)
+
+---
+
+## 💬 Sample Prompts for Testing
+
+To test the agent's tools in the ADK Web UI, local tests, or the Vertex AI Playground, use the following sample prompts:
+
+*   **Fiat Conversion**: `"Convert 100 USD to EUR"`
+*   **Batch Conversion**: `"Convert 1000 USD to EUR, GBP, and INR"`
+*   **Crypto Rates**: `"What is the current exchange rate for BTC in USD and EUR?"`
+*   **Historical Lookup**: `"What was the historical exchange rate of USD to INR on 2025-01-15?"`
+
+---
+
 ## 📦 Directory Structure
 
 ```
